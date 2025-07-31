@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  client:
+    build:
+      context: ./client
+    container_name: client
+    ports:
+      - "3000:80"
+    networks:
+      appnet:
+        ipv4_address: ${CLIENT_IP}
+
+  server:
+    build:
+      context: ./backend
+    container_name: server
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      appnet:
+        ipv4_address: ${SERVER_IP}
+
+  mongo:
+    image: mongo:7.0
+    container_name: mongo
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      appnet:
+        ipv4_address: ${MONGO_IP}
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    networks:
+      appnet:
+        ipv4_address: ${REDIS_IP}
+
+networks:
+  appnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${APP_SUBNET}
+          ip_range: ${APP_IP_RANGE}
+          gateway: ${APP_GATEWAY}
+
+volumes:
+  mongodb_data:
