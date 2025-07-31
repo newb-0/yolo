@@ -2,6 +2,8 @@
 
 ![Alt text](yolomy.png "DockerHub image")
 
+[Build image consideration](./explanation-microservice.md)
+
 A containerized e-commerce application
 
 ## Architecture
