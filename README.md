@@ -1,6 +1,8 @@
 # YOLO E-commerce Microservice Application
 
-A containerized MERN stack e-commerce application with product management capabilities.
+![Alt text](yolomy.png "DockerHub image")
+
+A containerized e-commerce application
 
 ## Architecture
 
