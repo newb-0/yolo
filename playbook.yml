@@ -1,0 +1,56 @@
+---
+- name: Deploy YOLO E-commerce Application
+  hosts: all
+  become: true
+  vars_files:
+    - variables.yml
+  
+  tasks:
+    - block:
+        - name: System Setup Block
+          include_role:
+            name: docker
+          tags: [setup, docker]
+        
+        - name: Clone Application Code
+          include_role:
+            name: git_clone
+          tags: [setup, git]
+        
+        - name: Setup Environment Files
+          include_role:
+            name: yolo_environment
+          tags: [setup, environment]
+      tags: [infrastructure]
+    
+    - block:
+        - name: Deploy Application with Docker Compose
+          include_role:
+            name: yolo_deploy
+          tags: [deploy]
+      tags: [application]
+  
+  handlers:
+    - name: restart docker
+      systemd:
+        name: docker
+        state: restarted
+      become: true
+  
+  post_tasks:
+    - name: Verify application is running
+      uri:
+        url: "http://{{ ansible_host }}:{{ app_port_client }}"
+        method: GET
+        timeout: 30
+      retries: 5
+      delay: 10
+      tags: [verify]
+    
+    - name: Display application URLs
+      debug:
+        msg:
+          - "Application deployed successfully!"
+          - "Frontend: http://{{ ansible_host }}:{{ app_port_client }}"
+          - "Backend API: http://{{ ansible_host }}:{{ app_port_server }}"
+      tags: [verify]

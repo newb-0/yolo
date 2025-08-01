@@ -8,3 +8,9 @@ vault.yml
 .vscode/*
 .vscode/*.json
 .env
+
+# Ansible
+*.retry
+
+# Vagrant
+*.box

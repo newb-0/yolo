@@ -1,0 +1,31 @@
+---
+- name: Stop existing containers
+  shell: |
+    sudo -u {{ app_user }} sg docker -c "docker compose down"
+  args:
+    chdir: "{{ app_directory }}"
+  ignore_errors: true
+  tags: [deploy, cleanup]
+
+- name: Build and start application with docker-compose
+  shell: |
+    sudo -u {{ app_user }} sg docker -c "docker compose up -d --build"
+  args:
+    chdir: "{{ app_directory }}"
+  tags: [deploy, start]
+
+- name: Wait for containers to be ready
+  pause:
+    seconds: 30
+  tags: [deploy, wait]
+
+- name: Verify containers are running
+  command: docker ps --format "table {{ '{{' }}.Names{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"
+  register: docker_status
+  become_user: "{{ app_user }}"
+  tags: [deploy, verify]
+
+- name: Display container status
+  debug:
+    var: docker_status.stdout_lines
+  tags: [deploy, verify]
