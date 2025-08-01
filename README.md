@@ -18,6 +18,8 @@ The application consists of three main components:
 - **Approach**: Docker containerization with multi-stage builds
 - **Details**: [Microservice Implementation Documentation](explanation-microservice.md)
 
+![Docker Images](yolomy.png)
+
 ### Stage 2: Ansible Configuration Management ✅
 
 - **Status**: Complete and functional
@@ -297,8 +299,8 @@ Service IPs:
 
 ## Documentation Links
 
-- [Ansible Stage 1 Implementation Details](explanation-ansible.md)
 - [Microservice Architecture Explanation](explanation-microservice.md)
+- [Ansible Stage 1 Implementation Details](explanation-ansible.md)
 
 ## Support & Maintenance
 
