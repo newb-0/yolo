@@ -1,37 +1,6 @@
-# Dependencies
-node_modules
-npm-debug.log*
-
-# Build output
-build
-dist
-
-# Environment files
-.env*
-
-# IDE files
-.vscode
-.idea
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Git
-.git
-.gitignore
-
-# Docker
-Dockerfile*
-docker-compose*
-.dockerignore
-
-# Tests & coverage
-coverage
-.nyc_output
-*.test.js
-*.spec.js
-
-# Docs
-README.md
-*.md
+# Exclude everything except what's needed for production
+*
+!public
+!src
+!package*.json
+!nginx.conf

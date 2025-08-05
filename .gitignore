@@ -1,16 +1,37 @@
-app-mongo-data
-app-mongo-data/
-vars.yml
-vault.yml
-.vagrant/
-.vscode/
-.vscode
-.vscode/*
-.vscode/*.json
+# Environment files
 .env
+*.env
+
+# Docker
+docker-compose.override.yml
+
+# Directories
+node_modules
+build
+dist
+.coverage
+.nyc_output
+
+# Editors
+.idea
+.vscode
+
+# Logs
+*.log
+logs
+
+# Misc
+.DS_Store
+dump.rdb
+
+# Docker data
+data/
 
 # Ansible
-*.retry
+inventory.ini
+.vagrant
 
-# Vagrant
-*.box
+# Terraform
+.terraform
+terraform.tfstate
+terraform.tfstate.backup

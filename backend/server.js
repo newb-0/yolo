@@ -44,7 +44,7 @@ app.use(cors());
 app.use('/api/products', productRoute)
 
 // Define the PORT
-const PORT = process.env.PORT || 5001
+const PORT = process.env.PORT || 5002
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`)
