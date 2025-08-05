@@ -1,4 +1,4 @@
-# YOLO E-commerce Platform - DevOps Implementation
+# YOLO E-commerce Platform
 
 A containerized e-commerce application demonstrating microservice architecture with progressive automation using configuration management and infrastructure as code.
 
