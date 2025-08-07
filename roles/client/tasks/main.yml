@@ -5,6 +5,8 @@
     build:
       path: "{{ app_dir }}/client"
       dockerfile: Dockerfile
+      args:
+        REACT_APP_BACKEND_URL: "{{ backend_url }}"
     source: build
     state: present
     force_source: yes
@@ -18,8 +20,6 @@
       - name: "{{ network_name }}"
     ports:
       - "{{ client_port }}:80"
-    env:
-      REACT_APP_BACKEND_URL: "{{ backend_url }}"
     state: started
     restart_policy: always
   tags: [client, full_deploy]
