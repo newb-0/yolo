@@ -1,7 +1,7 @@
 ---
 - name: Configure and deploy e-commerce application
-  hosts: localhost
-  become: yes
+  hosts: all
+  become: true
   vars_files:
     - vars/main.yml
 
