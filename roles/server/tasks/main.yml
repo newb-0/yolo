@@ -21,7 +21,7 @@
     env:
       NODE_ENV: production
       MONGODB_URI: "{{ mongodb_uri }}"
-      PORT: "{{ server_port }}"
+      PORT: "{{ server_port | string }}"
     state: started
     restart_policy: always
   tags: [server, full_deploy]
