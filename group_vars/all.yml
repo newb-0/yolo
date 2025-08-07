@@ -1,7 +1,7 @@
 # Application configuration
 app_dir: /vagrant
 git_repo: https://github.com/username/yolo-repo.git
-git_version: main
+git_version: master
 
 # Network configuration
 network_name: yolo_network
@@ -18,4 +18,4 @@ client_port: 3000
 mongodb_uri: mongodb://mongodb:27017/yolo
 
 # Backend URL for client
-backend_url: http://server:5002
+backend_url: http://localhost:5100
