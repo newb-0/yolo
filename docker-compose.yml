@@ -46,7 +46,7 @@ services:
       - MONGO_INITDB_DATABASE=yolo
     volumes:
       - mongodb_data:/data/db
-      - mongodb_config:data/configdb
+      - mongodb_config:/data/configdb
     command: mongod --logpath=/dev/null --quiet
 
 networks:
