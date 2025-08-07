@@ -1,6 +1,6 @@
 ---
 - name: Deploy yolomy E-commerce Application
-  hosts: vagrant
+  hosts: all
   become: true
   gather_facts: true
   vars_files:
