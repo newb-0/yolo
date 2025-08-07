@@ -4,8 +4,8 @@ This document provides detailed explanations for the technical decisions made du
 
 ## DockerHub Image
 
-<a href="./yolomy.png" target="_blank">
-  <img src="./yolomy.png" alt="Yolomy DockerHub Image Screenshot" style="max-width:100%; height:auto;">
+<a href="../../yolomy.png" target="_blank">
+  <img src="../../yolomy.png" alt="Yolomy DockerHub Image Screenshot" style="max-width:100%; height:auto;">
 </a>
 
 ## 1. Base Image Selection
