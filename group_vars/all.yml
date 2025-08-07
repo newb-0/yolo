@@ -1,18 +1,21 @@
-app_dir: /opt/yolo
-git_repo: "https://github.com/newb-0/yolo.git"
-git_version: "master"
+# Application configuration
+app_dir: /vagrant
+git_repo: https://github.com/username/yolo-repo.git
+git_version: main
 
 # Network configuration
-network_name: appnet
-client_port: 3000
+network_name: yolo_network
+
+# Image names
+mongodb_image: mongo:5.0
+redis_image: redis:7-alpine
+server_image: yolo_server:latest
+client_image: yolo_client:latest
+
+# Ports
 server_port: 5002
+client_port: 3000
+mongodb_uri: mongodb://mongodb:27017/yolo
 
-# Container configurations
-client_image: yolo-client
-server_image: yolo-server
-redis_image: redis:alpine
-mongodb_image: mongo:7.0-jammy
-
-# Environment variables
-mongodb_uri: "mongodb://mongodb:27017/yolo"
-backend_url: "http://server:{{ server_port }}"
+# Backend URL for client
+backend_url: http://server:5002

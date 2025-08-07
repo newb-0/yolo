@@ -1,21 +1,15 @@
 ---
-- name: Create application directory
-  file:
-    path: "{{ app_dir }}"
-    state: directory
-    mode: "0755"
-  tags: [setup]
-
-- name: Clone repository
-  git:
-    repo: "{{ git_repo }}"
-    dest: "{{ app_dir }}"
-    version: "{{ git_version }}"
-    force: yes
-  tags: [setup]
-
 - name: Create Docker network
   docker_network:
     name: "{{ network_name }}"
     state: present
-  tags: [network]
+  tags: [network, full_deploy]
+
+- name: Ensure application directory exists
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    mode: "0755"
+    owner: vagrant
+    group: vagrant
+  tags: [setup, full_deploy]

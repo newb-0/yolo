@@ -3,6 +3,8 @@
   docker_container:
     name: redis
     image: "{{ redis_image }}"
-    network_mode: "{{ network_name }}"
+    networks:
+      - name: "{{ network_name }}"
     state: started
-  tags: [redis]
+    restart_policy: always
+  tags: [redis, full_deploy]

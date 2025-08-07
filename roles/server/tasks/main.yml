@@ -4,15 +4,18 @@
     name: "{{ server_image }}"
     build:
       path: "{{ app_dir }}/backend"
+      dockerfile: Dockerfile
     source: build
     state: present
-  tags: [build]
+    force_source: yes
+  tags: [build, full_deploy]
 
 - name: Start server container
   docker_container:
     name: server
     image: "{{ server_image }}"
-    network_mode: "{{ network_name }}"
+    networks:
+      - name: "{{ network_name }}"
     ports:
       - "{{ server_port }}:{{ server_port }}"
     env:
@@ -20,4 +23,5 @@
       MONGODB_URI: "{{ mongodb_uri }}"
       PORT: "{{ server_port }}"
     state: started
-  tags: [server]
+    restart_policy: always
+  tags: [server, full_deploy]

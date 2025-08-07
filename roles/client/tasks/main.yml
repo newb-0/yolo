@@ -4,18 +4,22 @@
     name: "{{ client_image }}"
     build:
       path: "{{ app_dir }}/client"
+      dockerfile: Dockerfile
     source: build
     state: present
-  tags: [build]
+    force_source: yes
+  tags: [build, full_deploy]
 
 - name: Start client container
   docker_container:
     name: client
     image: "{{ client_image }}"
-    network_mode: "{{ network_name }}"
+    networks:
+      - name: "{{ network_name }}"
     ports:
       - "{{ client_port }}:80"
     env:
-      BACKEND_URL: "{{ backend_url }}"
+      REACT_APP_BACKEND_URL: "{{ backend_url }}"
     state: started
-  tags: [client]
+    restart_policy: always
+  tags: [client, full_deploy]
