@@ -52,7 +52,7 @@
       tags: [verification, full_deploy]
 
     - name: Verify container status
-      command: docker ps --format "table {{.Names}}\t{{.Status}}"
+      command: docker ps --format "table {{ '{{.Names}}' }}\t{{ '{{.Status}}' }}"
       register: container_status
       changed_when: false
       tags: [verification, full_deploy]
