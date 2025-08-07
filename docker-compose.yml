@@ -26,6 +26,7 @@ services:
       - PORT=5002
     depends_on:
       - redis
+      - mongodb
 
   redis:
     image: redis:alpine
@@ -33,6 +34,27 @@ services:
     networks:
       - appnet
 
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    networks:
+      - appnet
+    environment:
+      - MONGO_INITDB_DATABASE=yolo
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:data/configdb
+    command: mongod --logpath=/dev/null --quiet
+
 networks:
   appnet:
     driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
