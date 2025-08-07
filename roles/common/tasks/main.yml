@@ -1,0 +1,21 @@
+---
+- name: Install required system packages
+  apt:
+    name:
+      - docker.io
+      - docker-compose
+      - git
+    state: present
+    update_cache: yes
+
+- name: Start and enable Docker service
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Add user to docker group
+  user:
+    name: vagrant
+    groups: docker
+    append: yes

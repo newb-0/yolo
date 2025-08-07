@@ -1,0 +1,22 @@
+---
+- name: Run Redis container
+  docker_container:
+    name: redis
+    image: redis:alpine
+    restart_policy: unless-stopped
+
+- name: Run MongoDB container
+  docker_container:
+    name: mongodb
+    image: mongo:7.0-jammy
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    env:
+      MONGO_INITDB_DATABASE: yolo
+    restart_policy: unless-stopped
+  vars:
+    mongodb_data: /var/lib/mongodb_data
+    mongodb_config: /var/lib/mongodb_config

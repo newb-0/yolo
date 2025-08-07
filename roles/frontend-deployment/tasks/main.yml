@@ -1,0 +1,17 @@
+---
+- name: Build frontend Docker image
+  docker_image:
+    name: yolo-frontend
+    build:
+      path: /opt/yolo/client
+      args:
+        REACT_APP_BACKEND_URL: "http://localhost:5002"
+    source: build
+
+- name: Run frontend container
+  docker_container:
+    name: client
+    image: yolo-frontend
+    ports:
+      - "3000:80"
+    restart_policy: unless-stopped

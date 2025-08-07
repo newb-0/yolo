@@ -1,0 +1,16 @@
+---
+- name: Configure and deploy e-commerce application
+  hosts: localhost
+  become: yes
+  vars_files:
+    - vars/main.yml
+
+  roles:
+    - role: common
+      tags: common
+    - role: database-deployment
+      tags: database
+    - role: backend-deployment
+      tags: backend
+    - role: frontend-deployment
+      tags: frontend

@@ -1,0 +1,25 @@
+---
+- name: Clone repository
+  git:
+    repo: "{{ git_repo }}"
+    dest: /opt/yolo
+    version: "{{ git_branch }}"
+    force: yes
+
+- name: Build backend Docker image
+  docker_image:
+    name: yolo-backend
+    build:
+      path: /opt/yolo/backend
+    source: build
+
+- name: Run backend container
+  docker_container:
+    name: server
+    image: yolo-backend
+    network_mode: host
+    env:
+      NODE_ENV: production
+      MONGODB_URI: "{{ mongodb_uri }}"
+      PORT: 5002
+    restart_policy: unless-stopped
