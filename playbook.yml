@@ -1,16 +1,62 @@
 ---
-- name: Configure and deploy e-commerce application
+- name: Deploy yolomy E-commerce Application
   hosts: all
-  become: true
+  gather_facts: true
   vars_files:
-    - vars/main.yml
+    - group_vars/all.yml
+
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      tags: [system, update]
+
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - docker.io
+          - docker-compose
+          - python3-docker
+        state: present
+      tags: [system, packages]
+      notify: restart docker
 
   roles:
-    - role: common
-      tags: common
-    - role: database-deployment
-      tags: database
-    - role: backend-deployment
-      tags: backend
-    - role: frontend-deployment
-      tags: frontend
+    - { role: common, tags: [common, network] }
+    - { role: mongodb, tags: [mongodb, database] }
+    - { role: redis, tags: [redis, cache] }
+    - { role: server, tags: [server, backend] }
+    - { role: client, tags: [client, frontend] }
+
+  post_tasks:
+    - name: Verify container status
+      command: docker ps --format "table {{.Names}}\t{{.Status}}"
+      register: container_status
+      changed_when: false
+      tags: [verification]
+
+    - name: Display container status
+      debug:
+        msg: "{{ container_status.stdout_lines }}"
+      tags: [verification]
+
+    - name: Wait for application readiness
+      uri:
+        url: "http://localhost:{{ client_port }}"
+        method: GET
+        status_code: 200
+        timeout: 5
+      register: app_status
+      until: app_status.status == 200
+      retries: 12
+      delay: 5
+      tags: [verification]
+
+    - name: Display success message
+      debug:
+        msg: |
+          Application deployed successfully!
+          Access at: http://localhost:3000
+      tags: [notification]

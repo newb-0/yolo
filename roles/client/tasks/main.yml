@@ -1,0 +1,21 @@
+---
+- name: Build client image
+  docker_image:
+    name: "{{ client_image }}"
+    build:
+      path: "{{ app_dir }}/client"
+    source: build
+    state: present
+  tags: [build]
+
+- name: Start client container
+  docker_container:
+    name: client
+    image: "{{ client_image }}"
+    network_mode: "{{ network_name }}"
+    ports:
+      - "{{ client_port }}:80"
+    env:
+      BACKEND_URL: "{{ backend_url }}"
+    state: started
+  tags: [client]

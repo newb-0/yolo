@@ -1,0 +1,23 @@
+---
+- name: Create MongoDB volumes
+  command: docker volume create {{ item }}
+  loop:
+    - mongodb_data
+    - mongodb_config
+  tags: [storage]
+
+- name: Start MongoDB container
+  docker_container:
+    name: mongodb
+    image: "{{ mongodb_image }}"
+    network_mode: "{{ network_name }}"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    env:
+      MONGO_INITDB_DATABASE: yolo
+    command: mongod --logpath=/dev/null --quiet
+    state: started
+  tags: [mongodb]

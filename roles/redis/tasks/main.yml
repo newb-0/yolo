@@ -1,0 +1,8 @@
+---
+- name: Start Redis container
+  docker_container:
+    name: redis
+    image: "{{ redis_image }}"
+    network_mode: "{{ network_name }}"
+    state: started
+  tags: [redis]
