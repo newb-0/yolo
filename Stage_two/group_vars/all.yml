@@ -1,0 +1,26 @@
+# Application configuration
+app_dir: /vagrant
+git_repo: https://github.com/newb-0/yolo.git
+git_version: master
+
+# Terraform configuration
+terraform_dir: /vagrant/Stage_two/terraform
+environment: development
+terraform_workspace: default
+
+# Network configuration
+network_name: yolo_network_stage2
+
+# Image names
+mongodb_image: mongo:5.0
+redis_image: redis:7-alpine
+server_image: yolo_server_stage2:latest
+client_image: yolo_client_stage2:latest
+
+# Ports
+server_port: 5002
+client_port: 3000
+mongodb_uri: mongodb://mongodb:27017/yolo
+
+# Backend URL for client
+backend_url: http://localhost:5100
