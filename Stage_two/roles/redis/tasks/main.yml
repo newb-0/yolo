@@ -1,0 +1,10 @@
+---
+- name: Start Redis container
+  docker_container:
+    name: redis
+    image: "{{ redis_image }}"
+    networks:
+      - name: "{{ network_name }}"
+    state: started
+    restart_policy: always
+  tags: [redis, full_deploy]
