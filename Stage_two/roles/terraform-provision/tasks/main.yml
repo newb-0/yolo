@@ -1,0 +1,51 @@
+---
+- name: Check if Terraform is installed
+  command: terraform version
+  register: terraform_version
+  changed_when: false
+  failed_when: false
+  tags: [terraform, provision]
+
+- name: Install Terraform if not present
+  block:
+    - name: Download Terraform
+      get_url:
+        url: "https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip"
+        dest: "/tmp/terraform.zip"
+        mode: '0644'
+    
+    - name: Install unzip
+      apt:
+        name: unzip
+        state: present
+    
+    - name: Extract Terraform
+      unarchive:
+        src: "/tmp/terraform.zip"
+        dest: "/usr/local/bin"
+        remote_src: yes
+        mode: '0755'
+        creates: "/usr/local/bin/terraform"
+  when: terraform_version.rc != 0
+  tags: [terraform, install]
+
+- name: Initialize Terraform
+  terraform:
+    project_path: "{{ terraform_dir }}"
+    state: planned
+    plan_file: "{{ terraform_dir }}/terraform.tfplan"
+  register: terraform_plan
+  tags: [terraform, provision]
+
+- name: Apply Terraform configuration
+  terraform:
+    project_path: "{{ terraform_dir }}"
+    state: present
+    plan_file: "{{ terraform_dir }}/terraform.tfplan"
+  register: terraform_apply
+  tags: [terraform, provision]
+
+- name: Display Terraform outputs
+  debug:
+    var: terraform_apply.outputs
+  tags: [terraform, provision]
