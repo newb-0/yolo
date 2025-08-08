@@ -1,0 +1,15 @@
+---
+- name: Create Docker network
+  docker_network:
+    name: "{{ network_name }}"
+    state: present
+  tags: [network, full_deploy]
+
+- name: Ensure application directory exists
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    mode: "0755"
+    owner: vagrant
+    group: vagrant
+  tags: [setup, full_deploy]
