@@ -1,0 +1,76 @@
+---
+- name: Deploy yolomy E-commerce Application with Terraform
+  hosts: all
+  become: true
+  gather_facts: true
+  vars_files:
+    - group_vars/all.yml
+
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      tags: [system, update, full_deploy]
+
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - docker.io
+          - docker-compose
+          - python3-pip
+          - python3-docker
+          - curl
+          - unzip
+        state: present
+      tags: [system, packages, full_deploy]
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      tags: [system, docker, full_deploy]
+
+    - name: Add vagrant user to docker group
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+      tags: [system, docker, full_deploy]
+
+  roles:
+    - { role: terraform-provision, tags: [terraform, provision, full_deploy] }
+    - { role: common, tags: [common, network, full_deploy] }
+    - { role: mongodb, tags: [mongodb, database, full_deploy] }
+    - { role: redis, tags: [redis, cache, full_deploy] }
+    - { role: server, tags: [server, backend, full_deploy] }
+    - { role: client, tags: [client, frontend, full_deploy] }
+
+  post_tasks:
+    - name: Wait for containers to be ready
+      pause:
+        seconds: 10
+      tags: [verification, full_deploy]
+
+    - name: Verify container status
+      command: docker ps --format "table {{ '{{.Names}}' }}\t{{ '{{.Status}}' }}"
+      register: container_status
+      changed_when: false
+      tags: [verification, full_deploy]
+
+    - name: Display container status
+      debug:
+        msg: "{{ container_status.stdout_lines }}"
+      tags: [verification, full_deploy]
+
+    - name: Display success message
+      debug:
+        msg: |
+          yolomy E-commerce Application deployed successfully!
+          Infrastructure provisioned with Terraform
+          Application configured with Ansible
+          Access at: http://localhost:3100 (client)
+          API at: http://localhost:5100 (server)
+      tags: [notification, full_deploy]
