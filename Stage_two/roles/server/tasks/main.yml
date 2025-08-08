@@ -1,0 +1,27 @@
+---
+- name: Build server image
+  docker_image:
+    name: "{{ server_image }}"
+    build:
+      path: "{{ app_dir }}/backend"
+      dockerfile: Dockerfile
+    source: build
+    state: present
+    force_source: yes
+  tags: [build, full_deploy]
+
+- name: Start server container
+  docker_container:
+    name: server
+    image: "{{ server_image }}"
+    networks:
+      - name: "{{ network_name }}"
+    ports:
+      - "{{ server_port }}:{{ server_port }}"
+    env:
+      NODE_ENV: production
+      MONGODB_URI: "{{ mongodb_uri }}"
+      PORT: "{{ server_port | string }}"
+    state: started
+    restart_policy: always
+  tags: [server, full_deploy]
