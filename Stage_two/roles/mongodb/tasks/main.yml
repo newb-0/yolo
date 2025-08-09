@@ -1,5 +1,5 @@
 ---
-- name: Create MongoDB volumes
+- name: Create/Use existing MongoDB volumes
   docker_volume:
     name: "{{ item }}"
     state: present
@@ -10,7 +10,7 @@
 
 - name: Start MongoDB container
   docker_container:
-    name: mongodb
+    name: "{{ mongodb_container_name }}"
     image: "{{ mongodb_image }}"
     networks:
       - name: "{{ network_name }}"
@@ -21,6 +21,7 @@
       - mongodb_config:/data/configdb
     env:
       MONGO_INITDB_DATABASE: yolo
+    command: mongod --logpath=/dev/null --quiet
+    restart_policy: unless-stopped
     state: started
-    restart_policy: always
   tags: [mongodb, full_deploy]

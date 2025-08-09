@@ -1,7 +1,7 @@
 ---
 - name: Start Redis container
   docker_container:
-    name: redis
+    name: "{{ redis_container_name }}"
     image: "{{ redis_image }}"
     networks:
       - name: "{{ network_name }}"
