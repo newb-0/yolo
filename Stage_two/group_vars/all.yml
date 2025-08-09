@@ -1,5 +1,5 @@
 # Application configuration
-app_dir: /vagrant
+app_dir: /vagrant/..
 git_repo: https://github.com/newb-0/yolo.git
 git_version: master
 
