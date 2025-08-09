@@ -1,0 +1,16 @@
+# Vagrant
+.vagrant/
+
+# Terraform
+*.tfplan
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+
+# System files
+.DS_Store
+Thumbs.db
