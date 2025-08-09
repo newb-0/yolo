@@ -1,4 +1,31 @@
+# Stage_two/roles/server/tasks/main.yml
 ---
+- name: Debug app_dir variable
+  debug:
+    var: app_dir
+  tags: [debug, full_deploy]
+
+- name: Check if backend directory exists
+  stat:
+    path: "{{ app_dir }}/backend"
+  register: backend_dir
+  tags: [debug, full_deploy]
+
+- name: Debug backend directory status
+  debug:
+    var: backend_dir
+  tags: [debug, full_deploy]
+
+- name: List contents of app_dir
+  command: ls -la "{{ app_dir }}"
+  register: app_dir_contents
+  tags: [debug, full_deploy]
+
+- name: Show app_dir contents
+  debug:
+    var: app_dir_contents.stdout_lines
+  tags: [debug, full_deploy]
+
 - name: Build server image
   docker_image:
     name: "{{ server_image }}"
