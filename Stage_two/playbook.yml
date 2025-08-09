@@ -71,6 +71,6 @@
           yolomy E-commerce Application deployed successfully!
           Infrastructure provisioned with Terraform
           Application configured with Ansible
-          Access at: http://localhost:3100 (client)
-          API at: http://localhost:5100 (server)
+          Access at: http://localhost:{{ client_port }} (client)
+          API at: http://localhost:{{ server_port }} (server)
       tags: [notification, full_deploy]
