@@ -31,4 +31,4 @@ client_port: 3000
 mongodb_uri: "{{ ansible_env.MONGODB_URI | default('mongodb://mongodb:27017/yolo') }}"
 
 # Backend URL for client
-backend_url: http://localhost:5100
+backend_url: http://localhost:5002
