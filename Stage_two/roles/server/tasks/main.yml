@@ -22,7 +22,10 @@
   docker_container:
     name: "{{ server_container_name }}"
     image: "{{ server_image }}"
-    network_mode: host
+    networks:
+      - name: "{{ network_name }}"
+    ports:
+      - "{{ server_port }}:5002"
     env:
       NODE_ENV: production
       MONGODB_URI: "{{ ansible_env.MONGODB_URI | default('mongodb://localhost:27017/yolo') }}"
