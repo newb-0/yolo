@@ -4,7 +4,7 @@ git_repo: https://github.com/newb-0/yolo.git
 git_version: master
 
 # Terraform configuration
-terraform_dir: /vagrant/Stage_two/terraform
+terraform_dir: /vagrant/terraform
 environment: development
 terraform_workspace: default
 
