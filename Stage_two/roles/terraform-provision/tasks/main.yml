@@ -12,40 +12,57 @@
       get_url:
         url: "https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip"
         dest: "/tmp/terraform.zip"
-        mode: '0644'
-    
+        mode: "0644"
+
     - name: Install unzip
       apt:
         name: unzip
         state: present
-    
+
     - name: Extract Terraform
       unarchive:
         src: "/tmp/terraform.zip"
         dest: "/usr/local/bin"
         remote_src: yes
-        mode: '0755'
+        mode: "0755"
         creates: "/usr/local/bin/terraform"
   when: terraform_version.rc != 0
   tags: [terraform, install]
 
 - name: Initialize Terraform
-  terraform:
-    project_path: "{{ terraform_dir }}"
-    state: planned
-    plan_file: "{{ terraform_dir }}/terraform.tfplan"
+  command: terraform init
+  args:
+    chdir: "{{ terraform_dir }}"
+  register: terraform_init
+  changed_when: "'Terraform has been successfully initialized' in terraform_init.stdout"
+  tags: [terraform, provision]
+
+- name: Plan Terraform configuration
+  command: terraform plan -out=terraform.tfplan
+  args:
+    chdir: "{{ terraform_dir }}"
   register: terraform_plan
+  changed_when: terraform_plan.rc == 0
   tags: [terraform, provision]
 
 - name: Apply Terraform configuration
-  terraform:
-    project_path: "{{ terraform_dir }}"
-    state: present
-    plan_file: "{{ terraform_dir }}/terraform.tfplan"
+  command: terraform apply -auto-approve terraform.tfplan
+  args:
+    chdir: "{{ terraform_dir }}"
   register: terraform_apply
+  changed_when: terraform_apply.rc == 0
   tags: [terraform, provision]
 
 - name: Display Terraform outputs
+  command: terraform output -json
+  args:
+    chdir: "{{ terraform_dir }}"
+  register: terraform_outputs
+  changed_when: false
+  tags: [terraform, provision]
+
+- name: Show Terraform outputs
   debug:
-    var: terraform_apply.outputs
+    msg: "{{ terraform_outputs.stdout | from_json }}"
+  when: terraform_outputs.stdout != ""
   tags: [terraform, provision]
