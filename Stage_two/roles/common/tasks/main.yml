@@ -22,7 +22,8 @@
     remote_src: yes
   tags: [setup, full_deploy]
 
-- name: Source environment variables
-  shell: source /tmp/.env && env
-  register: env_vars
+- name: Read environment variables
+  slurp:
+    src: "{{ app_dir }}/.env"
+  register: env_file_content
   tags: [setup, full_deploy]
