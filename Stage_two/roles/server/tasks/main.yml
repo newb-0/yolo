@@ -1,4 +1,3 @@
-# Stage_two/roles/server/tasks/main.yml
 ---
 - name: Debug app_dir variable
   debug:
@@ -11,43 +10,22 @@
   register: backend_dir
   tags: [debug, full_deploy]
 
-- name: Debug backend directory status
-  debug:
-    var: backend_dir
-  tags: [debug, full_deploy]
-
-- name: List contents of app_dir
-  command: ls -la "{{ app_dir }}"
-  register: app_dir_contents
-  tags: [debug, full_deploy]
-
-- name: Show app_dir contents
-  debug:
-    var: app_dir_contents.stdout_lines
-  tags: [debug, full_deploy]
-
-- name: Build server image
+- name: Pull server image from DockerHub
   docker_image:
     name: "{{ server_image }}"
-    build:
-      path: "{{ app_dir }}/backend"
-      dockerfile: Dockerfile
-    source: build
+    source: pull
     state: present
     force_source: yes
-  tags: [build, full_deploy]
+  tags: [pull, full_deploy]
 
 - name: Start server container
   docker_container:
-    name: server
+    name: "{{ server_container_name }}"
     image: "{{ server_image }}"
-    networks:
-      - name: "{{ network_name }}"
-    ports:
-      - "{{ server_port }}:{{ server_port }}"
+    network_mode: host
     env:
       NODE_ENV: production
-      MONGODB_URI: "{{ mongodb_uri }}"
+      MONGODB_URI: "{{ ansible_env.MONGODB_URI | default('mongodb://localhost:27017/yolo') }}"
       PORT: "{{ server_port | string }}"
     state: started
     restart_policy: always

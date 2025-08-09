@@ -2,6 +2,7 @@
 - name: Create Docker network
   docker_network:
     name: "{{ network_name }}"
+    driver: bridge
     state: present
   tags: [network, full_deploy]
 
@@ -12,4 +13,16 @@
     mode: "0755"
     owner: vagrant
     group: vagrant
+  tags: [setup, full_deploy]
+
+- name: Copy .env file to VM for environment variables
+  copy:
+    src: "{{ app_dir }}/.env"
+    dest: /tmp/.env
+    remote_src: yes
+  tags: [setup, full_deploy]
+
+- name: Source environment variables
+  shell: source /tmp/.env && env
+  register: env_vars
   tags: [setup, full_deploy]

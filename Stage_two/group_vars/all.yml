@@ -9,18 +9,26 @@ environment: development
 terraform_workspace: default
 
 # Network configuration
-network_name: yolo_network_stage2
+network_name: appnet
+
+# Container names
+mongodb_container_name: mongodb
+redis_container_name: redis
+server_container_name: server
+client_container_name: client
 
 # Image names
-mongodb_image: mongo:5.0
-redis_image: redis:7-alpine
-server_image: yolo_server_stage2:latest
-client_image: yolo_client_stage2:latest
+mongodb_image: mongo:7.0-jammy
+redis_image: redis:alpine
+server_image: doc0pz/yolo-server:latest
+client_image: doc0pz/yolo-client:latest
 
 # Ports
 server_port: 5002
 client_port: 3000
-mongodb_uri: mongodb://mongodb:27017/yolo
+
+# MongoDB Configuration
+mongodb_uri: "{{ ansible_env.MONGODB_URI | default('mongodb://mongodb:27017/yolo') }}"
 
 # Backend URL for client
 backend_url: http://localhost:5100
