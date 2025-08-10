@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   client:
     build:
       context: ./client
-    container_name: client
+    container_name: yolo-client
     ports:
       - "3000:80"
     networks:
@@ -13,12 +11,12 @@ services:
       server:
         condition: service_started
     environment:
-      - REACT_APP_BACKEND_URL=http://localhost:5002
+      - REACT_APP_BACKEND_URL=http://server:5002
 
   server:
     build:
-      context: ./backend
-    container_name: server
+      context: ./backend  
+    container_name: yolo-server
     ports:
       - "5002:5002"
     networks:
@@ -29,35 +27,13 @@ services:
       - PORT=5002
     depends_on:
       - redis
-      - mongodb
 
   redis:
     image: redis:alpine
-    container_name: redis
+    container_name: yolo-redis
     networks:
       - appnet
-
-  mongodb:
-    image: mongo:7.0-jammy
-    container_name: mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    networks:
-      - appnet
-    environment:
-      - MONGO_INITDB_DATABASE=yolo
-    volumes:
-      - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
-    command: mongod --logpath=/dev/null --quiet
 
 networks:
   appnet:
     driver: bridge
-
-volumes:
-  mongodb_data:
-    driver: local
-  mongodb_config:
-    driver: local
