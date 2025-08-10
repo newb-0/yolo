@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: yolo
+  labels:
+    name: yolo
+    app: yolo-ecommerce
+  annotations:
+    description: "YOLO E-commerce application namespace"
