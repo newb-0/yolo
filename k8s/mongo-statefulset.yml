@@ -58,7 +58,7 @@ spec:
       name: mongo-persistent-storage
     spec:
       accessModes: ["ReadWriteOnce"]
-      storageClassName: "standard"
+      storageClassName: "managed-csi"
       resources:
         requests:
           storage: 2Gi
