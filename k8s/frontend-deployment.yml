@@ -17,6 +17,8 @@ spec:
         app: frontend
         component: ui
     spec:
+      securityContext:
+        runAsUser: 0
       containers:
       - name: frontend
         image: doc0pz/yolo-client:v1.2.1
