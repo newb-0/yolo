@@ -14,7 +14,7 @@ This project demonstrates the complete DevOps lifecycle implementation for a mod
 ## 🏗️ Architecture Evolution
 
 ```
-Stage 1: Containerization    →    Stage 2: Automation    →       Stage 3: IaC    →       Stage 4: Orchestration
+Stage 1: Containerization    →    Stage 2: Automation    →       Stage 3: IaC       →      Stage 4: Orchestration
 ┌─────────────────────┐         ┌─────────────────────┐       ┌─────────────────────┐       ┌─────────────────────┐
 │   Docker Compose    │         │   Ansible Playbook │       │  Terraform + Ansible│       │  Kubernetes (AKS)   │
 │   Manual Deployment │         │   Vagrant VM        │       │   Cloud Infrastructure│       │   Container Orchestr.│
