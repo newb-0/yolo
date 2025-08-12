@@ -1,4 +1,4 @@
-# YOLO E-commerce Platform - DevOps Implementation Journey
+# [yolomy](http://4.255.32.247) E-commerce Platform - DevOps Implementation Journey
 
 A comprehensive multi-stage DevOps implementation showcasing the evolution from containerized microservices to fully automated infrastructure provisioning, configuration management, and Kubernetes orchestration.
 
