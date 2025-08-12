@@ -1,6 +1,6 @@
 # Kubernetes Implementation Technical Reasoning
 
-This document provides detailed explanations for the technical decisions made during the Kubernetes orchestration of the YOLO e-commerce application on Azure Kubernetes Service.
+This document provides detailed explanations for the technical decisions made during the Kubernetes orchestration of the ["yolomy"](http://4.255.32.247) e-commerce application on Azure Kubernetes Service.
 
 ## Live Application
 
@@ -413,4 +413,4 @@ livenessProbe:
 - Traffic distribution across availability zones
 - Integration with Azure DNS for custom domain mapping
 
-This comprehensive implementation demonstrates production-ready Kubernetes orchestration practices while maintaining operational simplicity and cost-effectiveness for the YOLO e-commerce application.
+This comprehensive implementation shows Kubernetes orchestration practices for the ["yolomy"](http://4.255.32.247) e-commerce application.
