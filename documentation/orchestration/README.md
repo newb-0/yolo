@@ -1,4 +1,4 @@
-# YOLO E-commerce Kubernetes Orchestration
+# [yolomy](http://4.255.32.247) E-commerce Kubernetes Orchestration
 
 A comprehensive guide to deploying a full-stack e-commerce application on Azure Kubernetes Service (AKS), implementing StatefulSets for persistent storage, load balancing, and production-ready container orchestration.
 

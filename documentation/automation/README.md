@@ -1,4 +1,4 @@
-# YOLO E-commerce Ansible Configuration Management
+# [yolomy](http://4.255.32.247) E-commerce Ansible Configuration Management
 
 A comprehensive guide to automating the deployment of a containerized e-commerce application using Ansible configuration management with Vagrant-provisioned infrastructure.
 

@@ -1,6 +1,6 @@
-# YOLO E-commerce Microservice Containerization
+# [yolomy](http://4.255.32.247) E-commerce Microservice Containerization
 
-A comprehensive guide to containerizing a full-stack e-commerce application using Docker and Docker Compose, implementing microservice architecture with MongoDB Atlas integration.
+A comprehensive guide to containerizing an e-commerce application using Docker and Docker Compose, implementing microservice architecture with MongoDB Atlas integration.
 
 ## 📋 Prerequisites
 
@@ -241,13 +241,11 @@ CMD ["lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
 Create `docker-compose.yml`:
 
 ```yaml
-version: '3.8'
-
 services:
   client:
     build:
       context: ./client
-    container_name: client
+    container_name: yolo-client
     ports:
       - "3000:80"
     networks:
@@ -256,51 +254,32 @@ services:
       server:
         condition: service_started
     environment:
-      - BACKEND_URL=http://host.docker.internal:5002
+      - REACT_APP_BACKEND_URL=http://server:5002
 
   server:
     build:
-      context: ./backend
-    container_name: server
-    network_mode: "host"
+      context: ./backend  
+    container_name: yolo-server
+    ports:
+      - "5002:5002"
+    networks:
+      - appnet
     environment:
       - NODE_ENV=production
       - MONGODB_URI=${MONGODB_URI}
       - PORT=5002
     depends_on:
       - redis
-      - mongodb
 
   redis:
     image: redis:alpine
-    container_name: redis
+    container_name: yolo-redis
     networks:
       - appnet
-
-  mongodb:
-    image: mongo:7.0-jammy
-    container_name: mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    networks:
-      - appnet
-    environment:
-      - MONGO_INITDB_DATABASE=yolo
-    volumes:
-      - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
-    command: mongod --logpath=/dev/null --quiet
 
 networks:
   appnet:
     driver: bridge
-
-volumes:
-  mongodb_data:
-    driver: local
-  mongodb_config:
-    driver: local
 ```
 
 ### Step 5: Build and Deploy

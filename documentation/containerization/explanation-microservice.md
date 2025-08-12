@@ -1,11 +1,11 @@
 # Technical Implementation Reasoning
 
-This document provides detailed explanations for the technical decisions made during the containerization of the YOLO e-commerce microservice application.
+This document provides detailed explanations for the technical decisions made during the containerization of [yolomy](http://4.255.32.247) e-commerce microservice application.
 
 ## DockerHub Image
 
-<a href="../../yolomy.png" target="_blank">
-  <img src="../../yolomy.png" alt="Yolomy DockerHub Image Screenshot" style="max-width:100%; height:auto;">
+<a href="../../dhub.png" target="_blank">
+  <img src="../../dhub.png" alt="Yolomy DockerHub Image Screenshot" style="max-width:100%; height:auto;">
 </a>
 
 ## 1. Base Image Selection
@@ -344,4 +344,4 @@ docker tag yolo-server:latest doc0pz/yolo-server:1.0.0
 - **Network restrictions**: Database access configured for development (production would use restricted IP ranges)
 - **Container isolation**: Each service runs in dedicated container with minimal privileges
 
-This implementation demonstrates production-ready containerization practices while maintaining development flexibility and operational simplicity.
+This implementation demonstrates production-ready containerization practices.

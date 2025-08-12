@@ -1,6 +1,6 @@
 # Technical Implementation Reasoning - Ansible Configuration Management
 
-This document provides detailed explanations for the technical decisions made during the implementation of Ansible configuration management for the YOLO e-commerce application deployment.
+This document provides detailed explanations for the technical decisions made during the implementation of Ansible configuration management for the [yolomy](http://4.255.32.247) e-commerce application deployment.
 
 ## 1. Ansible Playbook Architecture and Role Design
 
@@ -763,4 +763,4 @@ force_source: yes
 - **API Functionality**: Backend API responds on host port 5100
 - **Data Operations**: CRUD operations work through web interface
 
-This implementation demonstrates production-ready Infrastructure as Code practices using Ansible for automated deployment, while maintaining development flexibility and operational reliability.
+This implementation demonstrates Infrastructure as Code practices using Ansible for automated deployment, while maintaining development flexibility and operational reliability.

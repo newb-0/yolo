@@ -2,6 +2,10 @@
 
 A comprehensive multi-stage DevOps implementation showcasing the evolution from containerized microservices to fully automated infrastructure provisioning, configuration management, and Kubernetes orchestration.
 
+<a href="./yolomy-ui.png" target="_blank">
+  <img src="./yolomy-ui.png" alt="Yolomy DockerHub Image Screenshot" style="max-width:100%; height:auto;">
+</a>
+
 ## 🎯 Project Overview
 
 This project demonstrates the complete DevOps lifecycle implementation for a modern e-commerce application, progressing through four distinct stages:
@@ -16,9 +20,9 @@ This project demonstrates the complete DevOps lifecycle implementation for a mod
 ```
 Stage 1: Containerization    →    Stage 2: Automation    →       Stage 3: IaC       →        Stage 4: Orchestration
 ┌─────────────────────┐         ┌─────────────────────┐       ┌─────────────────────┐       ┌─────────────────────┐
-│   Docker Compose    │         │   Ansible Playbook │       │  Terraform + Ansible│       │  Kubernetes (AKS)   │
-│   Manual Deployment │         │   Vagrant VM        │       │   Cloud Infrastructure│       │   Container Orchestr.│
-│   Local Development │         │   Automated Config  │       │   Full Automation    │       │   Production Ready   │
+│   Docker Compose    │                          │   Ansible Playbook │                            │  Terraform + Ansible│                           │  Kubernetes (AKS)   │
+│   Manual Deployment │                          │   Vagrant VM        │                          │   Cloud Infrastructure│                        │   Container Orchestr.│
+│   Local Development │                          │   Automated Config  │                          │   Full Automation    │                         │   Production Ready   │
 └─────────────────────┘         └─────────────────────┘       └─────────────────────┘       └─────────────────────┘
 ```
 
