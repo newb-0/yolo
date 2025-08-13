@@ -38,10 +38,11 @@ metadata:
   labels:
     app: backend
 spec:
-  type: ClusterIP
+  type: NodePort
   ports:
   - port: 5002
     targetPort: 5002
+    nodePort: 30502
     name: http-port
   selector:
     app: backend

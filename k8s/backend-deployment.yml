@@ -25,7 +25,10 @@ spec:
           name: http-port
         env:
         - name: MONGODB_URI
-          value: "mongodb://mongodb-service:27017/yolo"
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: mongodb-uri
         - name: PORT
           value: "5002"
         - name: NODE_ENV
