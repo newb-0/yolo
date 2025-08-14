@@ -1,9 +1,9 @@
-# [yolomy](http://4.255.32.247) E-commerce Platform - DevOps Implementation Journey
+# [Yolomy](http://4.255.32.247) E-commerce Platform - DevOps Implementation Journey
 
 A comprehensive multi-stage DevOps implementation showcasing the evolution from containerized microservices to fully automated infrastructure provisioning, configuration management, and Kubernetes orchestration.
 
-<a href="./yolomy-ui.png" target="_blank">
-  <img src="./yolomy-ui.png" alt="Yolomy DockerHub Image Screenshot" style="max-width:100%; height:auto;">
+<a href="./screenshots/yolomy-frontend.png" target="_blank">
+  <img src="./screenshots/yolomy-frontend.png" alt="Yolomy frontend image" style="max-width:100%; height:auto;">
 </a>
 
 ## 🎯 Project Overview
@@ -130,7 +130,7 @@ Stage 1: Containerization  →    Stage 2: Automation       →    Stage 3: IaC 
 ### Stage 1 - Containerization
 
 ```bash
-git clone <repository-url>
+git clone <https://github.com/Vinge1718/yolo>
 cd yolo
 docker-compose up -d
 # Application available at http://localhost:3000
