@@ -18,41 +18,41 @@ spec:
         component: api
     spec:
       containers:
-      - name: backend
-        image: doc0pz/yolo-server:v1.2.1
-        ports:
-        - containerPort: 5002
-          name: http-port
-        env:
-        - name: MONGODB_URI
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-secret
-              key: mongodb-uri
-        - name: PORT
-          value: "5002"
-        - name: NODE_ENV
-          value: "production"
-        - name: REDIS_HOST
-          value: "redis-service"
-        - name: REDIS_PORT
-          value: "6379"
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "300m"
-        readinessProbe:
-          httpGet:
-            path: /api/products
-            port: 5002
-          initialDelaySeconds: 10
-          periodSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /api/products
-            port: 5002
-          initialDelaySeconds: 30
-          periodSeconds: 10
+        - name: backend
+          image: doc0pz/yolo-server:v1.2.1
+          ports:
+            - containerPort: 5002
+              name: http-port
+          env:
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongodb-uri
+            - name: PORT
+              value: "5002"
+            - name: NODE_ENV
+              value: "production"
+            - name: REDIS_HOST
+              value: "redis-service"
+            - name: REDIS_PORT
+              value: "6379"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
+          readinessProbe:
+            httpGet:
+              path: /api/products
+              port: 5002
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/products
+              port: 5002
+            initialDelaySeconds: 30
+            periodSeconds: 10

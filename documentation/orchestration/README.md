@@ -92,6 +92,7 @@ az group create --name yolo-k8s-rg --location eastus
 ```
 
 **Expected output:**
+
 ```json
 {
   "id": "/subscriptions/{subscription-id}/resourceGroups/yolo-k8s-rg",
@@ -145,6 +146,7 @@ kubectl get nodes
 ```
 
 **Expected output:**
+
 ```
 NAME                                STATUS   ROLES    AGE   VERSION
 aks-nodepool1-xxxxx-vmss000000     Ready    <none>   5m    v1.32.6
@@ -163,6 +165,7 @@ echo -n "your-mongodb-atlas-connection-string" | base64
 ```
 
 Create `k8s/mongodb-secret.yml`:
+
 ```yaml
 apiVersion: v1
 kind: Secret
@@ -179,6 +182,7 @@ data:
 #### 4.1 Create Application Namespace
 
 Create `k8s/namespace.yml`:
+
 ```yaml
 apiVersion: v1
 kind: Namespace
@@ -192,6 +196,7 @@ metadata:
 ```
 
 Apply namespace:
+
 ```bash
 kubectl apply -f k8s/namespace.yml
 ```
@@ -199,6 +204,7 @@ kubectl apply -f k8s/namespace.yml
 #### 4.2 Deploy MongoDB StatefulSet
 
 Create `k8s/mongo-statefulset.yml`:
+
 ```yaml
 apiVersion: apps/v1
 kind: StatefulSet
@@ -267,6 +273,7 @@ spec:
 ```
 
 Deploy StatefulSet:
+
 ```bash
 kubectl apply -f k8s/mongo-statefulset.yml
 ```
@@ -274,6 +281,7 @@ kubectl apply -f k8s/mongo-statefulset.yml
 #### 4.3 Deploy Application Services
 
 Create `k8s/services.yml`:
+
 ```yaml
 apiVersion: v1
 kind: Service
@@ -341,6 +349,7 @@ spec:
 ```
 
 Deploy services:
+
 ```bash
 kubectl apply -f k8s/services.yml
 ```
@@ -348,23 +357,27 @@ kubectl apply -f k8s/services.yml
 #### 4.4 Deploy Application Components
 
 Deploy Redis cache:
+
 ```bash
 # Create k8s/redis-deployment.yml and apply
 kubectl apply -f k8s/redis-deployment.yml
 ```
 
 Deploy backend API:
+
 ```bash
 # Create k8s/backend-deployment.yml with your Docker images and apply
 kubectl apply -f k8s/backend-deployment.yml
 ```
 
 Wait for backend LoadBalancer IP:
+
 ```bash
 kubectl get service backend-service -n yolo --watch
 ```
 
 Once backend external IP is assigned, update frontend deployment with backend URL and deploy:
+
 ```bash
 # Update k8s/frontend-deployment.yml with backend external IP
 # Build new frontend image with correct backend URL:
@@ -524,17 +537,20 @@ This Kubernetes deployment implements:
 ## 🔗 Production Considerations
 
 ### Security Enhancements
+
 - Implement Network Policies for traffic restriction
 - Use Kubernetes Secrets for sensitive data (MongoDB credentials)
 - Configure RBAC for service accounts
 - Enable Pod Security Standards
 
 ### Monitoring and Logging
+
 - Azure Monitor integration enabled during cluster creation
 - Container insights for performance monitoring
 - Log Analytics workspace for centralized logging
 
 ### High Availability
+
 - Multi-replica deployments for critical services
 - ReadinessProbe and LivenessProbe for health monitoring
 - StatefulSet for data persistence and ordered deployment

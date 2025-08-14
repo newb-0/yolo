@@ -35,3 +35,4 @@ inventory.ini
 .terraform
 terraform.tfstate
 terraform.tfstate.backup
+k8s/mongodb-secret.yml
