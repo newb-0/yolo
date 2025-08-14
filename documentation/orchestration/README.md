@@ -20,10 +20,10 @@ Before starting this project, ensure you have the following installed and config
 
 ### Pre-requisites from Previous Stages
 
-- Completed containerization stage with images:
-  - `doc0pz/yolo-client:v1.2.1`
-  - `doc0pz/yolo-server:v1.2.1`
-- Local testing completed with minikube or Docker Compose
+- Completed containerization stage with images pushed to DockerHub:
+  - `your-dockerhub-username/yolo-client:v1.2.x`
+  - `your-dockerhub-username/yolo-server:v1.2.x`
+- Local testing completed with Docker Compose
 
 ## 🏗️ Project Structure
 
@@ -31,13 +31,15 @@ Before starting this project, ensure you have the following installed and config
 yolo/
 ├── k8s/
 │   ├── namespace.yml
+│   ├── mongodb-secret.yml
 │   ├── mongo-statefulset.yml
 │   ├── redis-deployment.yml
 │   ├── backend-deployment.yml
 │   ├── frontend-deployment.yml
-│   ├── services.yml
+│   └── services.yml
+├── documentation/orchestration/
 │   ├── README.md
-│   └── explanation.md
+│   └── explanation-kubernetes.md
 ├── backend/
 ├── client/
 ├── docker-compose.yml
@@ -57,6 +59,9 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 # macOS with Homebrew
 brew install azure-cli
 
+# Windows (via PowerShell)
+Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
+
 # Verify installation
 az --version
 ```
@@ -67,12 +72,17 @@ az --version
 # Login to Azure account
 az login
 
-# Select subscription if you have multiple
+# List available subscriptions
 az account list --output table
+
+# Set active subscription (if multiple)
 az account set --subscription "your-subscription-id"
+
+# Verify current subscription
+az account show
 ```
 
-### Step 2: Azure Kubernetes Service (AKS) Cluster Creation
+### Step 2: Azure Kubernetes Service (AKS) Cluster Setup
 
 #### 2.1 Create Resource Group
 
@@ -93,7 +103,7 @@ az group create --name yolo-k8s-rg --location eastus
 }
 ```
 
-#### 2.2 Register Required Providers
+#### 2.2 Register Azure Providers
 
 ```bash
 # Register necessary Azure providers
@@ -104,7 +114,7 @@ az provider register --namespace Microsoft.Compute
 az provider register --namespace Microsoft.Insights
 
 # Verify registration status
-az provider show --namespace Microsoft.ContainerService --query "registrationState"
+az provider list --query "[?namespace=='Microsoft.ContainerService'].{Provider:namespace, Status:registrationState}" --output table
 ```
 
 #### 2.3 Create AKS Cluster
@@ -117,20 +127,20 @@ az aks create \
   --node-count 2 \
   --enable-addons monitoring \
   --generate-ssh-keys \
-  --node-vm-size Standard_B2s
+  --node-vm-size Standard_B2s \
+  --kubernetes-version 1.32.6
 ```
 
-**Note**: Cluster creation takes 5-10 minutes.
+**Note**: Cluster creation takes 5-10 minutes. Monitor progress in Azure portal.
 
-### Step 3: Connect to AKS Cluster
-
-#### 3.1 Get Cluster Credentials
+#### 2.4 Connect to AKS Cluster
 
 ```bash
 # Download cluster credentials
 az aks get-credentials --resource-group yolo-k8s-rg --name yolo-k8s-cluster
 
-# Verify connection
+# Verify connection and context
+kubectl config get-contexts
 kubectl get nodes
 ```
 
@@ -141,12 +151,34 @@ aks-nodepool1-xxxxx-vmss000000     Ready    <none>   5m    v1.32.6
 aks-nodepool1-xxxxx-vmss000001     Ready    <none>   5m    v1.32.6
 ```
 
-### Step 4: Kubernetes Manifests Creation
+### Step 3: Prepare Application Secrets and Configuration
 
-#### 4.1 Create Namespace Configuration
+#### 3.1 Create MongoDB Atlas Connection (Optional)
+
+If using MongoDB Atlas instead of local MongoDB:
+
+```bash
+# Create MongoDB secret for Atlas connection
+echo -n "your-mongodb-atlas-connection-string" | base64
+```
+
+Create `k8s/mongodb-secret.yml`:
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-secret
+  namespace: yolo
+type: Opaque
+data:
+  mongodb-uri: <base64-encoded-connection-string>
+```
+
+### Step 4: Kubernetes Manifests Deployment
+
+#### 4.1 Create Application Namespace
 
 Create `k8s/namespace.yml`:
-
 ```yaml
 apiVersion: v1
 kind: Namespace
@@ -159,10 +191,14 @@ metadata:
     description: "YOLO E-commerce application namespace"
 ```
 
-#### 4.2 Create MongoDB StatefulSet
+Apply namespace:
+```bash
+kubectl apply -f k8s/namespace.yml
+```
+
+#### 4.2 Deploy MongoDB StatefulSet
 
 Create `k8s/mongo-statefulset.yml`:
-
 ```yaml
 apiVersion: apps/v1
 kind: StatefulSet
@@ -184,8 +220,6 @@ spec:
         app: mongodb
         component: database
     spec:
-      securityContext:
-        runAsUser: 0
       containers:
       - name: mongodb
         image: mongo:4.4
@@ -232,183 +266,14 @@ spec:
           storage: 2Gi
 ```
 
-#### 4.3 Create Redis Deployment
-
-Create `k8s/redis-deployment.yml`:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: redis-deployment
-  namespace: yolo
-  labels:
-    app: redis
-    component: cache
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: redis
-  template:
-    metadata:
-      labels:
-        app: redis
-        component: cache
-      annotations:
-        description: "Redis cache for YOLO application"
-    spec:
-      containers:
-      - name: redis
-        image: redis:alpine
-        ports:
-        - containerPort: 6379
-          name: redis-port
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "100m"
-          limits:
-            memory: "128Mi"
-            cpu: "200m"
-        readinessProbe:
-          exec:
-            command:
-            - redis-cli
-            - ping
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        livenessProbe:
-          exec:
-            command:
-            - redis-cli
-            - ping
-          initialDelaySeconds: 30
-          periodSeconds: 10
+Deploy StatefulSet:
+```bash
+kubectl apply -f k8s/mongo-statefulset.yml
 ```
 
-#### 4.4 Create Backend Deployment
-
-Create `k8s/backend-deployment.yml`:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: backend
-  namespace: yolo
-  labels:
-    app: backend
-    component: api
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: backend
-  template:
-    metadata:
-      labels:
-        app: backend
-        component: api
-    spec:
-      containers:
-      - name: backend
-        image: doc0pz/yolo-server:v1.2.1
-        ports:
-        - containerPort: 5002
-          name: http-port
-        env:
-        - name: MONGODB_URI
-          value: "mongodb://mongodb-service:27017/yolo"
-        - name: PORT
-          value: "5002"
-        - name: NODE_ENV
-          value: "production"
-        - name: REDIS_HOST
-          value: "redis-service"
-        - name: REDIS_PORT
-          value: "6379"
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "300m"
-        readinessProbe:
-          httpGet:
-            path: /api/products
-            port: 5002
-          initialDelaySeconds: 10
-          periodSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /api/products
-            port: 5002
-          initialDelaySeconds: 30
-          periodSeconds: 10
-```
-
-#### 4.5 Create Frontend Deployment
-
-Create `k8s/frontend-deployment.yml`:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: frontend
-  namespace: yolo
-  labels:
-    app: frontend
-    component: ui
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: frontend
-  template:
-    metadata:
-      labels:
-        app: frontend
-        component: ui
-    spec:
-      securityContext:
-        runAsUser: 0
-      containers:
-      - name: frontend
-        image: doc0pz/yolo-client:v1.2.1
-        ports:
-        - containerPort: 80
-          name: http-port
-        env:
-        - name: REACT_APP_BACKEND_URL
-          value: "http://backend-service:5002"
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "50m"
-          limits:
-            memory: "128Mi"
-            cpu: "100m"
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 15
-          periodSeconds: 10
-```
-
-#### 4.6 Create Services Configuration
+#### 4.3 Deploy Application Services
 
 Create `k8s/services.yml`:
-
 ```yaml
 apiVersion: v1
 kind: Service
@@ -450,7 +315,7 @@ metadata:
   labels:
     app: backend
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
   - port: 5002
     targetPort: 5002
@@ -475,130 +340,173 @@ spec:
     app: frontend
 ```
 
-### Step 5: Deploy Application to AKS
-
-#### 5.1 Apply Kubernetes Manifests
-
-Deploy in the following order to ensure dependencies:
-
+Deploy services:
 ```bash
-# Create namespace
-kubectl apply -f k8s/namespace.yml
-
-# Deploy StatefulSet for database
-kubectl apply -f k8s/mongo-statefulset.yml
-
-# Deploy cache layer
-kubectl apply -f k8s/redis-deployment.yml
-
-# Deploy services
 kubectl apply -f k8s/services.yml
+```
 
-# Deploy backend API
+#### 4.4 Deploy Application Components
+
+Deploy Redis cache:
+```bash
+# Create k8s/redis-deployment.yml and apply
+kubectl apply -f k8s/redis-deployment.yml
+```
+
+Deploy backend API:
+```bash
+# Create k8s/backend-deployment.yml with your Docker images and apply
 kubectl apply -f k8s/backend-deployment.yml
+```
+
+Wait for backend LoadBalancer IP:
+```bash
+kubectl get service backend-service -n yolo --watch
+```
+
+Once backend external IP is assigned, update frontend deployment with backend URL and deploy:
+```bash
+# Update k8s/frontend-deployment.yml with backend external IP
+# Build new frontend image with correct backend URL:
+cd client
+docker build --build-arg REACT_APP_BACKEND_URL=http://BACKEND_EXTERNAL_IP:5002 -t your-dockerhub-username/yolo-client:v1.2.3 .
+docker push your-dockerhub-username/yolo-client:v1.2.3
 
 # Deploy frontend
 kubectl apply -f k8s/frontend-deployment.yml
 ```
 
-#### 5.2 Verify Deployment Status
+### Step 5: Verify Deployment and Access Application
+
+#### 5.1 Check Deployment Status
 
 ```bash
-# Check all pods are running
+# Verify all pods are running
 kubectl get pods -n yolo
 
-# Verify services are created
+# Check services and external IPs
 kubectl get services -n yolo
 
-# Check persistent volumes
+# Verify persistent volumes
 kubectl get pv,pvc -n yolo
 ```
 
-**Expected output:**
-```
-NAME                                READY   STATUS    RESTARTS   AGE
-backend-54b7597654-xxxxx            1/1     Running   0          5m
-backend-54b7597654-yyyyy            1/1     Running   0          5m
-frontend-768b57887f-zzzzz           1/1     Running   0          4m
-mongodb-0                           1/1     Running   0          6m
-redis-deployment-84f8c47578-aaaaa   1/1     Running   0          5m
-```
-
-#### 5.3 Wait for External IP Assignment
+#### 5.2 Monitor LoadBalancer IP Assignment
 
 ```bash
-# Monitor LoadBalancer service for external IP
+# Watch for frontend service external IP
 kubectl get service frontend-service -n yolo --watch
 ```
 
-**Expected progression:**
-```
-NAME               TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
-frontend-service   LoadBalancer   10.0.220.157   <pending>     80:32188/TCP   2m
-frontend-service   LoadBalancer   10.0.220.157   4.255.32.247  80:32188/TCP   3m
-```
+Wait until `EXTERNAL-IP` shows an actual IP address instead of `<pending>`.
 
-### Step 6: Application Access and Testing
+#### 5.3 Access Live Application
 
-#### 6.1 Access Your Live Application
+Once external IP is assigned (e.g., `4.255.32.247`), access your application:
 
-Once external IP is assigned, access your application at:
+**🎉 Live Application URL: `http://YOUR_EXTERNAL_IP`**
 
-**🎉 Live Application URL: `http://4.255.32.247`**
+### Step 6: Testing and Validation
 
-#### 6.2 Test Application Functionality
+#### 6.1 Application Functionality Testing
 
 1. **Frontend Access**: Navigate to the external IP in your browser
-2. **Product Management**: Test adding, viewing, editing, and deleting products
-3. **Data Persistence**: Verify data survives pod restarts
+2. **Product Management**: Test CRUD operations (Create, Read, Update, Delete products)
+3. **Data Persistence**: Add products and verify they persist after pod restarts
 
-#### 6.3 Verify Persistent Storage
+#### 6.2 Persistent Storage Validation
 
-Test StatefulSet persistence:
+Test StatefulSet data persistence:
 
 ```bash
-# Delete MongoDB pod to test persistence
+# Add some products through the web interface first, then test persistence
+
+# Delete MongoDB pod to test data persistence
 kubectl delete pod mongodb-0 -n yolo
 
 # Watch pod recreation
-kubectl get pods -n yolo -w
+kubectl get pods -n yolo --watch
 
-# Verify data persistence after restart
-kubectl exec -it mongodb-0 -n yolo -- mongo yolo --eval "db.products.find()"
+# Verify data persisted after pod restart
+kubectl exec -it mongodb-0 -n yolo -- mongo yolo --eval "db.products.find().pretty()"
 ```
 
-## 🔧 Troubleshooting
-
-### Common Issues and Solutions
-
-#### Pod CrashLoopBackOff
+#### 6.3 Scaling Test
 
 ```bash
-# Check pod logs
-kubectl logs <pod-name> -n yolo
+# Scale backend deployment
+kubectl scale deployment backend --replicas=3 -n yolo
 
-# Describe pod for events
-kubectl describe pod <pod-name> -n yolo
+# Verify scaling
+kubectl get pods -n yolo -l app=backend
 ```
 
-#### External IP Stuck in Pending
+## 🛠️ Context Switching and Troubleshooting
+
+### Switching Between Kubernetes Contexts
+
+```bash
+# List available contexts
+kubectl config get-contexts
+
+# Switch to AKS context (if multiple clusters)
+kubectl config use-context yolo-k8s-cluster
+
+# Verify current context
+kubectl config current-context
+```
+
+### Common Troubleshooting Commands
+
+#### Pod Issues
+
+```bash
+# Check pod status and events
+kubectl get pods -n yolo
+kubectl describe pod <pod-name> -n yolo
+
+# View pod logs
+kubectl logs <pod-name> -n yolo
+kubectl logs -f <pod-name> -n yolo  # Follow logs
+
+# Access pod shell for debugging
+kubectl exec -it <pod-name> -n yolo -- /bin/bash
+```
+
+#### Service and Network Issues
+
+```bash
+# Check service endpoints
+kubectl get endpoints -n yolo
+
+# Test internal connectivity
+kubectl run debug --image=busybox -n yolo --rm -it --restart=Never -- nslookup backend-service
+
+# Port forwarding for local testing
+kubectl port-forward service/backend-service -n yolo 5002:5002
+```
+
+#### Storage Issues
+
+```bash
+# Check persistent volumes and claims
+kubectl get pv,pvc -n yolo
+
+# Describe storage issues
+kubectl describe pvc mongo-persistent-storage-mongodb-0 -n yolo
+```
+
+### LoadBalancer IP Troubleshooting
+
+If external IP remains `<pending>`:
 
 ```bash
 # Check LoadBalancer service events
 kubectl describe service frontend-service -n yolo
+kubectl describe service backend-service -n yolo
 
-# Verify AKS cluster has proper permissions
-az aks show --resource-group yolo-k8s-rg --name yolo-k8s-cluster
-```
-
-#### Database Connection Issues
-
-```bash
-# Test MongoDB connectivity
-kubectl exec -it mongodb-0 -n yolo -- mongo --eval "db.adminCommand('ismaster')"
-
-# Check service endpoints
-kubectl get endpoints -n yolo
+# Verify Azure LoadBalancer provisioning
+az network lb list --resource-group MC_yolo-k8s-rg_yolo-k8s-cluster_eastus
 ```
 
 ## 📊 Architecture Overview
@@ -606,49 +514,50 @@ kubectl get endpoints -n yolo
 This Kubernetes deployment implements:
 
 - **Frontend**: React application with LoadBalancer service for external access
-- **Backend**: Node.js API with horizontal scaling (2 replicas)
-- **Database**: MongoDB StatefulSet with persistent storage (2Gi)
+- **Backend**: Node.js API with LoadBalancer service and horizontal scaling (2 replicas)
+- **Database**: MongoDB StatefulSet with persistent storage (2Gi Azure Managed Disk)
 - **Cache**: Redis deployment for session management
-- **Networking**: ClusterIP services for internal communication
-- **Storage**: Managed-CSI persistent volumes for data persistence
-- **Security**: Resource limits, health checks, and proper service exposure
+- **Networking**: External LoadBalancer services for frontend and backend access
+- **Storage**: Azure Managed-CSI persistent volumes for data persistence
+- **Security**: Resource limits, health checks, and proper namespace isolation
 
 ## 🔗 Production Considerations
 
 ### Security Enhancements
 - Implement Network Policies for traffic restriction
-- Use Kubernetes Secrets for sensitive data
+- Use Kubernetes Secrets for sensitive data (MongoDB credentials)
 - Configure RBAC for service accounts
 - Enable Pod Security Standards
 
 ### Monitoring and Logging
-- Azure Monitor integration enabled
+- Azure Monitor integration enabled during cluster creation
 - Container insights for performance monitoring
 - Log Analytics workspace for centralized logging
 
 ### High Availability
 - Multi-replica deployments for critical services
-- Anti-affinity rules for pod distribution
 - ReadinessProbe and LivenessProbe for health monitoring
+- StatefulSet for data persistence and ordered deployment
 
-## 📝 Key Features
+## 📝 Key Implementation Features
 
-✅ **StatefulSet Implementation** for persistent database storage  
-✅ **Horizontal Pod Autoscaling** capability with resource limits  
-✅ **LoadBalancer Service** for external internet access  
-✅ **Persistent Volumes** using Azure Managed Disks  
-✅ **Health Checks** with readiness and liveness probes  
-✅ **Production-ready** Azure Kubernetes Service deployment  
+✅ **StatefulSet Implementation** - MongoDB with persistent storage and ordered deployment  
+✅ **LoadBalancer Services** - External access for both frontend and backend  
+✅ **Persistent Volumes** - 2Gi Azure Managed Disk with CSI driver  
+✅ **Health Checks** - Readiness and liveness probes for all services  
+✅ **Resource Management** - CPU and memory limits for optimal performance  
+✅ **Horizontal Scaling** - Multiple backend replicas for load distribution  
+✅ **Production-ready** - Azure Kubernetes Service with monitoring integration  
 
-## 🎯 Success Criteria
+## 🎯 Success Criteria Checklist
 
 - [x] AKS cluster created and configured successfully
+- [x] StatefulSet implemented for database with persistent storage
 - [x] All Kubernetes manifests deployed without errors
-- [x] StatefulSet maintains data persistence across pod restarts
-- [x] LoadBalancer service provides external IP access
+- [x] LoadBalancer services provide external IP access
 - [x] Application fully functional with CRUD operations
-- [x] Persistent storage working with 2Gi allocation
-- [x] Live application accessible at: **http://4.255.32.247**
+- [x] Data persistence verified across pod restarts
+- [x] Live application accessible externally
 
 ## 📚 Additional Resources
 
