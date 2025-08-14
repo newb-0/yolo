@@ -44,6 +44,7 @@ volumeClaimTemplates:
 **Sequential Deployment and Scaling**: StatefulSets ensure pods are created, updated, and deleted in order, which is crucial for database initialization and prevents data corruption during scaling operations.
 
 **Benefits over Deployment for Database**:
+
 - Guaranteed persistent storage attachment to specific pods
 - Predictable pod naming (mongodb-0, mongodb-1, etc.)
 - Proper handling of storage during scaling operations
@@ -81,6 +82,7 @@ spec:
 **Load Distribution**: Multiple replicas automatically distribute traffic across different nodes and availability zones.
 
 **Reasoning for Backend Replica Count (2)**:
+
 - High availability for critical API layer
 - Load distribution across cluster nodes
 - Fault tolerance for single pod failure scenarios
@@ -89,6 +91,7 @@ spec:
 ### Service Architecture Design
 
 **ClusterIP Services for Internal Communication**:
+
 ```yaml
 # MongoDB Service (Headless)
 apiVersion: v1
@@ -108,6 +111,7 @@ spec:
 ```
 
 **LoadBalancer Services for External Access**:
+
 ```yaml
 # Frontend Service (External)
 apiVersion: v1
@@ -127,6 +131,7 @@ spec:
 ```
 
 **Architecture Benefits**:
+
 - **Security**: Internal services not exposed to internet
 - **Performance**: Direct pod-to-pod communication within cluster
 - **Flexibility**: External API access for frontend-backend communication
@@ -139,6 +144,7 @@ spec:
 **Primary Implementation**: Azure LoadBalancer services for external connectivity
 
 **Frontend Service Configuration**:
+
 ```yaml
 apiVersion: v1
 kind: Service
@@ -156,6 +162,7 @@ spec:
 ```
 
 **Backend Service Configuration**:
+
 ```yaml
 apiVersion: v1
 kind: Service
@@ -177,6 +184,7 @@ spec:
 **LoadBalancer vs NodePort Comparison**:
 
 **LoadBalancer Advantages**:
+
 - Provides stable, dedicated external IP addresses
 - Standard HTTP/HTTPS ports (80/443) without port number requirements
 - Automatic Azure integration for public IP provisioning
@@ -186,6 +194,7 @@ spec:
 **LoadBalancer vs Ingress Controller Comparison**:
 
 **LoadBalancer Benefits for This Implementation**:
+
 - Simpler setup and configuration for multi-service exposure
 - Direct Azure Load Balancer integration without additional components
 - Individual service control and isolation
@@ -193,6 +202,7 @@ spec:
 - Immediate external access without complex routing rules
 
 **Azure-Specific Integration Benefits**:
+
 - Automatic Azure Load Balancer resource provisioning
 - Integration with Azure Virtual Network infrastructure
 - Built-in health monitoring and traffic distribution
@@ -209,6 +219,7 @@ REACT_APP_BACKEND_URL=http://20.253.108.211:5002
 ```
 
 **Technical Reasoning**:
+
 - Browser-based frontend requires external access to backend APIs
 - LoadBalancer provides stable external endpoint for frontend consumption
 - Eliminates CORS issues with internal service communication
@@ -239,6 +250,7 @@ spec:
 **Technical Implementation Analysis**:
 
 **managed-csi vs standard StorageClass**:
+
 - **Performance**: CSI drivers provide superior I/O performance and throughput
 - **Features**: Advanced capabilities including volume snapshots, expansion, and encryption
 - **Azure Integration**: Native Azure Disk service integration with optimal performance
@@ -246,6 +258,7 @@ spec:
 - **Reliability**: Mature driver implementation with extensive testing and validation
 
 **Access Mode Selection (ReadWriteOnce)**:
+
 - **Database Workloads**: Optimal for single-instance database requiring exclusive storage access
 - **Performance Characteristics**: Prevents concurrent write conflicts and ensures data consistency
 - **Azure Disk Limitations**: ReadWriteOnce aligns with Azure Managed Disk capabilities
@@ -254,6 +267,7 @@ spec:
 ### Volume Configuration Strategy
 
 **MongoDB Data Persistence Implementation**:
+
 ```yaml
 containers:
 - name: mongodb
@@ -277,6 +291,7 @@ containers:
 **Storage Allocation Strategy**: 2Gi initial allocation
 
 **Resource Planning Justification**:
+
 - **Development Environment**: Sufficient capacity for demonstration and testing scenarios
 - **Cost Optimization**: Minimal storage cost for proof-of-concept implementation  
 - **Expansion Capability**: Azure Managed CSI supports volume expansion for future growth
@@ -313,11 +328,13 @@ git push origin feature/kubernetes
 ### Commit Strategy Implementation
 
 **Commit Organization Approach**:
+
 - **Atomic Commits**: Each Kubernetes manifest represents a logical, standalone change
 - **Descriptive Messages**: Clear commit messages following conventional commit format
 - **Dependency Order**: Commits follow logical deployment dependency sequence
 
 **Example Commit Sequence**:
+
 ```bash
 feat: add Kubernetes namespace configuration
 feat: implement MongoDB StatefulSet with persistent storage  
@@ -329,6 +346,7 @@ docs: update README with deployment instructions
 ```
 
 **Documentation Strategy**:
+
 - **Progressive Documentation**: README updates accompany each major implementation milestone
 - **Technical Reasoning**: Explanation.md provides detailed technical decision documentation
 - **Troubleshooting Guides**: Common issues and resolution steps documented
@@ -337,9 +355,10 @@ docs: update README with deployment instructions
 
 ### Production Deployment Verification
 
-**Live Application Accessibility**: http://4.255.32.247
+**Live Application Accessibility**: <http://4.255.32.247>
 
 **Deployment Status Validation**:
+
 ```bash
 NAME                                READY   STATUS    RESTARTS   AGE
 backend-6db6f887c6-8rtxw            1/1     Running   0          2m3s
@@ -350,6 +369,7 @@ redis-deployment-84f8c47578-6k74p   1/1     Running   0          2d1h
 ```
 
 **Service Connectivity Verification**:
+
 ```bash
 NAME               TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)          AGE
 backend-service    LoadBalancer   10.0.82.51      20.253.108.211   5002:30502/TCP   2d2h
@@ -369,6 +389,7 @@ redis-service      ClusterIP      10.0.215.150    <none>           6379/TCP     
 ✅ **Cache Functionality**: Redis cache operates properly for session management
 
 **Performance Validation**:
+
 - **Response Times**: Application responds within acceptable performance thresholds
 - **Load Distribution**: Traffic properly distributed across backend replicas
 - **Resource Utilization**: Pods operate within defined resource limits and requests
@@ -376,6 +397,7 @@ redis-service      ClusterIP      10.0.215.150    <none>           6379/TCP     
 ### Data Persistence Validation Testing
 
 **StatefulSet Persistence Testing Process**:
+
 ```bash
 # Add products through web interface
 # Delete MongoDB pod to simulate failure
@@ -395,6 +417,7 @@ kubectl exec -it mongodb-0 -n yolo -- mongo yolo --eval "db.products.find().pret
 ### Image Versioning Strategy
 
 **Implemented Naming Convention**:
+
 ```yaml
 containers:
 - name: backend
@@ -414,6 +437,7 @@ containers:
 **Version Evolution Tracking**: Incremental versioning enables deployment history and rollback capabilities.
 
 **Benefits for Operations**:
+
 - **Deployment Tracking**: Easy identification of currently running application versions
 - **Rollback Strategy**: Simple reversion to previous stable versions when issues occur
 - **Environment Consistency**: Same tagged images deployed across development, staging, and production
@@ -422,6 +446,7 @@ containers:
 ### Image Management Strategy
 
 **Build and Update Process**:
+
 ```bash
 # Frontend rebuild with backend connectivity
 cd client
@@ -434,6 +459,7 @@ kubectl set image deployment/frontend frontend=doc0pz/yolo-client:v1.2.3 -n yolo
 ```
 
 **Version Management Benefits**:
+
 - **Build-time Configuration**: Backend URL configured during image build for optimal performance
 - **Immutable Deployments**: Tagged images ensure consistent deployments across environments
 - **Release Management**: Clear version progression supports structured release processes
@@ -443,6 +469,7 @@ kubectl set image deployment/frontend frontend=doc0pz/yolo-client:v1.2.3 -n yolo
 ### Resource Allocation Implementation
 
 **Backend Service Resource Configuration**:
+
 ```yaml
 resources:
   requests:
@@ -454,6 +481,7 @@ resources:
 ```
 
 **Frontend Service Resource Configuration**:
+
 ```yaml
 resources:
   requests:
@@ -465,6 +493,7 @@ resources:
 ```
 
 **Resource Planning Justification**:
+
 - **Requests**: Guaranteed resource allocation ensures pod scheduling and minimum performance levels
 - **Limits**: Prevents resource exhaustion that could affect other pods and cluster stability
 - **Service Differentiation**: Backend allocated more resources for API processing and database operations
@@ -474,6 +503,7 @@ resources:
 ### Health Check Implementation Strategy
 
 **Readiness Probe Configuration**:
+
 ```yaml
 readinessProbe:
   httpGet:
@@ -486,6 +516,7 @@ readinessProbe:
 ```
 
 **Liveness Probe Configuration**:
+
 ```yaml
 livenessProbe:
   httpGet:
@@ -498,6 +529,7 @@ livenessProbe:
 ```
 
 **Health Check Benefits Analysis**:
+
 - **Traffic Management**: ReadinessProbe prevents traffic routing to pods that aren't ready to serve requests
 - **Self-Healing**: LivenessProbe automatically restarts pods that become unresponsive or unhealthy
 - **Zero-Downtime Deployments**: Proper probe timing ensures smooth rolling updates without service interruption
@@ -508,12 +540,14 @@ livenessProbe:
 ### AKS Integration Advantages
 
 **Managed Kubernetes Benefits**:
+
 - **Automatic Updates**: Azure handles Kubernetes version management and security patches
 - **Integrated Monitoring**: Built-in Azure Monitor container insights for comprehensive observability
 - **Identity Integration**: Azure Active Directory integration capability for enhanced security
 - **Auto-scaling**: Cluster autoscaler and horizontal pod autoscaler support for dynamic scaling
 
 **Azure Networking Integration**:
+
 ```yaml
 # LoadBalancer automatically provisions Azure Load Balancer
 spec:
@@ -524,6 +558,7 @@ spec:
 ```
 
 **Networking Benefits**:
+
 - **Native Load Balancer**: Automatic Azure Load Balancer resource provisioning and management
 - **Public IP Management**: Automatic public IP assignment and DNS integration capabilities
 - **Traffic Distribution**: Intelligent traffic routing across availability zones for high availability
@@ -532,11 +567,13 @@ spec:
 ### Storage Integration with Azure
 
 **Azure Managed Disk Integration**:
+
 ```yaml
 storageClassName: "managed-csi"  # Azure Managed Disk CSI driver
 ```
 
 **Azure Storage Advantages**:
+
 - **Performance Tiers**: Multiple performance levels (Standard, Premium SSD) available for different workloads
 - **Backup Integration**: Azure Backup service integration for automated data protection
 - **Encryption**: Built-in encryption at rest and in transit for data security
@@ -547,6 +584,7 @@ storageClassName: "managed-csi"  # Azure Managed Disk CSI driver
 ### Namespace Isolation Strategy
 
 **Security Boundary Implementation**:
+
 ```yaml
 apiVersion: v1
 kind: Namespace
@@ -558,6 +596,7 @@ metadata:
 ```
 
 **Isolation Benefits**:
+
 - **Resource Isolation**: Application resources isolated from other cluster workloads
 - **RBAC Foundation**: Namespace provides foundation for role-based access control implementation
 - **Network Policy Support**: Enables implementation of network policies for traffic restriction
@@ -566,6 +605,7 @@ metadata:
 ### Secret Management Implementation
 
 **MongoDB Connection Security**:
+
 ```yaml
 apiVersion: v1
 kind: Secret
@@ -578,6 +618,7 @@ data:
 ```
 
 **Security Best Practices Applied**:
+
 - **Base64 Encoding**: Sensitive connection strings encoded for basic obfuscation
 - **Namespace Scoped**: Secrets accessible only within the yolo namespace
 - **Volume Mounting**: Secrets mounted as files rather than environment variables for enhanced security
@@ -588,12 +629,14 @@ data:
 ### Azure Monitor Integration
 
 **Container Insights Configuration**:
+
 - **Automatic Setup**: Container insights enabled during AKS cluster creation
 - **Pod Metrics**: CPU, memory, and storage utilization monitoring for all pods
 - **Application Logs**: Centralized log collection and analysis through Log Analytics workspace
 - **Performance Analytics**: Application performance monitoring and alerting capabilities
 
 **Monitoring Benefits**:
+
 - **Proactive Monitoring**: Early detection of performance issues and resource constraints
 - **Troubleshooting**: Comprehensive logging and metrics for rapid issue resolution
 - **Capacity Planning**: Historical metrics enable informed scaling and resource allocation decisions
@@ -604,6 +647,7 @@ data:
 ### Rolling Update Strategy
 
 **Deployment Configuration**:
+
 ```yaml
 strategy:
   type: RollingUpdate
@@ -613,6 +657,7 @@ strategy:
 ```
 
 **Benefits of Rolling Updates**:
+
 - **Zero Downtime**: Continuous service availability during application updates
 - **Risk Mitigation**: Gradual rollout enables early detection of issues before full deployment
 - **Rollback Capability**: Quick rollback to previous version if problems are detected
@@ -621,12 +666,14 @@ strategy:
 ### Production Readiness Considerations
 
 **High Availability Features**:
+
 - **Multi-Replica Deployments**: Backend service runs with 2 replicas for fault tolerance
 - **Health Checks**: Comprehensive readiness and liveness probes ensure service reliability
 - **Persistent Storage**: StatefulSet with persistent volumes ensures data durability
 - **Load Balancing**: Automatic traffic distribution across healthy pod instances
 
 **Operational Excellence**:
+
 - **Monitoring Integration**: Azure Monitor provides comprehensive observability
 - **Resource Management**: Proper resource requests and limits prevent resource contention
 - **Security Hardening**: Namespace isolation and secret management for sensitive data
